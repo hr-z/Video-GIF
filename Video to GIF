@@ -1,0 +1,80 @@
+#importing modules
+import cv2
+import imageio
+from PIL import Image, ImageSequence
+
+#Initialize an empty list to hold each frame of the video
+images = []
+
+#define the method that convert video to GIF
+def convert_GIF(video):
+	#Ask user's input for the time period of the video they want to convert to GIF
+	start_sec = int(input("Enter the time you want to start capturing (in second): "))
+	end_sec = int(input("Enter the time you want to stop capturing (in second): "))
+
+	#Ask user's input for the speed of the GIF
+	speed = input("Enter the speed you want for your GIF(slow,normal,fast): ")
+	while speed != "slow" and speed != "normal" and speed != "fast":
+		speed = input("Please enter slow/normal/fast: ")
+
+	print("Processing...")	
+	
+	#Capture and store a video object
+	cap = cv2.VideoCapture(video)
+
+	#Get the fps(frame per second) of the video
+	fps = int(cap.get(cv2.CAP_PROP_FPS))
+	#Adjust the fps of the GIF depending on what user chose
+	if speed == "slow":
+		rate = fps-10
+	elif speed == "fast":
+		rate = fps+10
+	else:
+		rate = fps
+	
+	#Create variables for later use, since the video is split each frame, not each second.
+	start_frame = start_sec * fps
+	end_frame = end_sec * fps
+
+	#read() returns the next frame of the video, ret returns true if there is picture returned from calling read()
+	ret,frame = cap.read()
+	num = 0
+
+	#use while loop to add needed frames to the list
+	while ret and num < end_frame:
+		if num > start_frame:
+			images.append(frame)
+		ret, frame = cap.read()
+		num += 1
+
+	#use mimsave() from imageio to take all the frames of the images list, and make it a GIF
+	imageio.mimsave("Converted.gif", images, fps = rate)
+	print("Finished Converting")
+
+	#Prompt user if also needs to reverse the GIF
+	reverse_order = input("Also reverse it? (yes or no): ")
+	if reverse_order == "yes":
+		reverse_GIF()
+	else:
+		print("Please check the gif file in the folder")
+	
+#This method reverse a GIF
+def reverse_GIF():
+	#use the open() method in Image to open the previous GIF and store it
+	im = Image.open('Converted.gif')
+	frames = []
+
+	#Use the Iterator class in ImageSequence to get each frame of an animated image
+	for f in ImageSequence.Iterator(im) :
+		f = f.copy()
+		frames.append(f)
+	#Reverse the list of frames
+	frames.reverse()
+	#Save the list of reversed frames to a GIF
+	frames[0].save('Reversed.gif', save_all =True, append_images = frames[1:], loop = 0, duration = 10)
+	print("Finished Reversing")
+
+#Ask user for the name of the video
+v = input("Name: ")	
+#Call the method
+convert_GIF(v)
