@@ -1,0 +1,14 @@
+def reverse_GIF():
+	#use the open() method in Image to open the previous GIF and store it
+	im = Image.open('Converted.gif')
+	frames = []
+
+	#Use the Iterator class in ImageSequence to get each frame of an animated image
+	for f in ImageSequence.Iterator(im) :
+		f = f.copy()
+		frames.append(f)
+	#Reverse the list of frames
+	frames.reverse()
+	#Save the list of reversed frames to a GIF
+	frames[0].save('Reversed.gif', save_all =True, append_images = frames[1:], loop = 0, duration = 10)
+	print("Finished Reversing")
